@@ -46,10 +46,10 @@ netplan_config = {
                 "addresses": [config_jdata["address"]],
                 "nameservers": {
                     "addresses": config_jdata["dns"],
+                },
                 "routes": [
                     {"to": "default", "via":  config_jdata["gateway"], "on-link": True}
                     ]   
-                }
             }
         }
     }
