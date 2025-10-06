@@ -42,10 +42,13 @@ netplan_config = {
         "ethernets": {
             config_jdata["interface"]: {
                 "dhcp4": False,
+                "dhcp6": False,
+                "accept-ra": False,
                 "addresses": [config_jdata["address"]],
                 "gateway4": config_jdata["gateway"],
                 "nameservers": {
-                    "addresses": config_jdata["dns"]
+                    "addresses": config_jdata["dns"],
+                "optional": True
                 }
             }
         }
@@ -57,6 +60,7 @@ if __name__ == "__main__":
 
     with open(WRITE_NETCFG_FILE, "w") as f:
         yaml.safe_dump(netplan_config, f, sort_keys=False)
-    subprocess.run(["hostnamectl", "set-hostname", config_jdata["hostname"]], check=True)
+        
+    #subprocess.run(["hostnamectl", "set-hostname", config_jdata["hostname"]], check=True)
     
     print(config_jdata)
