@@ -8,6 +8,7 @@ from dataclasses import dataclass, asdict
 NETPLAN_DIR = Path("/etc/netplan")
 HOSTNAME_FILE = Path("/etc/hostname")
 HOSTS_FILE = Path("/etc/hosts")
+INTERFACES = Path("/etc/network/interfaces")
 
 JSON_CONFIG_FILE = "config.json"
 WRITE_NETCFG_FILE = "01-netcfg.yaml"
@@ -56,19 +57,24 @@ netplan_config = {
 }
 
 ifupdown_config = {
-    "auto": ["lo", config_jdata["interface"]],
+    "auto": ["lo", "vmbr0"],
     "interfaces": {
         "lo": {
-            "method": "loopback",
+            "method": "loopback"
         },
-        config_jdata["interface"]: {
+        "eno1": {
+            "method": "manual"
+        },
+        "vmbr0": {
             "method": "static",
             "address": config_jdata["address"],
             "gateway": config_jdata["gateway"],
-            "dns-nameservers": ["8.8.8.8", "8.8.4.4"],
-            "mtu": 1500,
-        },
-    }
+            "bridge-ports": ["eno1"],
+            "bridge-stp": "off",
+            "bridge-fd": 0
+        }
+    },
+    "include": "/etc/network/interfaces.d/*"
 }
 
 def generate_ifupdown_text(cfg: dict) -> str:
@@ -96,7 +102,8 @@ if __name__ == "__main__":
             yaml.safe_dump(netplan_config, f, sort_keys=False)
     except FileNotFoundError:
         print(f"[WARN] {NETPLAN_DIR} が存在しません。別の設定方式（ifupdownなど）に切り替えます。")
-        print(generate_ifupdown_text(ifupdown_config))
+        with open(INTERFACES, "w") as f:
+            f.write(generate_ifupdown_text(ifupdown_config))
     
 
     subprocess.run(["hostnamectl", "set-hostname", config_jdata["hostname"]], check=True)
