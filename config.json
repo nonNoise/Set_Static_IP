@@ -1,0 +1,9 @@
+{
+  "hostname": "yocto",
+  "interface": "enp3s0",
+  "mode": "static",
+  "address": "192.168.100.101",
+  "prefix": 24,
+  "gateway": "192.168.100.101",
+  "dns": ["1.1.1.1", "8.8.8.8"]
+}
