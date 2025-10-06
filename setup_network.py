@@ -42,13 +42,13 @@ netplan_config = {
         "ethernets": {
             config_jdata["interface"]: {
                 "dhcp4": False,
-                "dhcp6": False,
                 "accept-ra": False,
                 "addresses": [config_jdata["address"]],
-                "gateway4": config_jdata["gateway"],
                 "nameservers": {
                     "addresses": config_jdata["dns"],
-                "optional": True
+                "routes": [
+                    {"to": "default", "via":  config_jdata["gateway"], "on-link": True}
+                    ]   
                 }
             }
         }
