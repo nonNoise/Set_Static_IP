@@ -61,6 +61,6 @@ if __name__ == "__main__":
     with open(NETPLAN_DIR / WRITE_NETCFG_FILE, "w") as f:
         yaml.safe_dump(netplan_config, f, sort_keys=False)
         
-    #subprocess.run(["hostnamectl", "set-hostname", config_jdata["hostname"]], check=True)
+    subprocess.run(["hostnamectl", "set-hostname", config_jdata["hostname"]], check=True)
     
     print(config_jdata)
