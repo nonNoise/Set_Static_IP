@@ -55,12 +55,50 @@ netplan_config = {
     }
 }
 
+ifupdown_config = {
+    "auto": ["lo", config_jdata["interface"]],
+    "interfaces": {
+        "lo": {
+            "method": "loopback",
+        },
+        config_jdata["interface"]: {
+            "method": "static",
+            "address": config_jdata["address"],
+            "gateway": config_jdata["gateway"],
+            "dns-nameservers": ["8.8.8.8", "8.8.4.4"],
+            "mtu": 1500,
+        },
+    }
+}
+
+def generate_ifupdown_text(cfg: dict) -> str:
+    lines = []
+    for iface in cfg.get("auto", []):
+        lines.append(f"auto {iface}")
+    lines.append("")  
+
+    for name, params in cfg["interfaces"].items():
+        method = params.get("method", "manual")
+        lines.append(f"iface {name} inet {method}")
+        for key, val in params.items():
+            if key == "method":
+                continue
+            if isinstance(val, list):
+                val = " ".join(str(v) for v in val)
+            lines.append(f"    {key} {val}")
+        lines.append("")  
+    return "\n".join(lines)
+
 
 if __name__ == "__main__":
+    try:
+        with open(NETPLAN_DIR / WRITE_NETCFG_FILE, "w") as f:
+            yaml.safe_dump(netplan_config, f, sort_keys=False)
+    except FileNotFoundError:
+        print(f"[WARN] {NETPLAN_DIR} が存在しません。別の設定方式（ifupdownなど）に切り替えます。")
+        print(generate_ifupdown_text(ifupdown_config))
+    
 
-    with open(NETPLAN_DIR / WRITE_NETCFG_FILE, "w") as f:
-        yaml.safe_dump(netplan_config, f, sort_keys=False)
-        
     subprocess.run(["hostnamectl", "set-hostname", config_jdata["hostname"]], check=True)
     
     print(config_jdata)
